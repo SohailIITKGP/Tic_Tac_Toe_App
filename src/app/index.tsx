@@ -18,57 +18,29 @@ export default function Index() {
     setGameState(new Array(9).fill('empty', 0, 9));
   };
 
-  const checkIsWinner = () => {
-    if (
-      gameState[0] === gameState[1] &&
-      gameState[0] === gameState[2] &&
-      gameState[0] !== 'empty'
-    ) {
-      setGameWinner(`${gameState[0]} won the game! 🥳`);
-    } else if (
-      gameState[3] !== 'empty' &&
-      gameState[3] === gameState[4] &&
-      gameState[4] === gameState[5]
-    ) {
-      setGameWinner(`${gameState[3]} won the game! 🥳`);
-    } else if (
-      gameState[6] !== 'empty' &&
-      gameState[6] === gameState[7] &&
-      gameState[7] === gameState[8]
-    ) {
-      setGameWinner(`${gameState[6]} won the game! 🥳`);
-    } else if (
-      gameState[0] !== 'empty' &&
-      gameState[0] === gameState[3] &&
-      gameState[3] === gameState[6]
-    ) {
-      setGameWinner(`${gameState[0]} won the game! 🥳`);
-    } else if (
-      gameState[1] !== 'empty' &&
-      gameState[1] === gameState[4] &&
-      gameState[4] === gameState[7]
-    ) {
-      setGameWinner(`${gameState[1]} won the game! 🥳`);
-    } else if (
-      gameState[2] !== 'empty' &&
-      gameState[2] === gameState[5] &&
-      gameState[5] === gameState[8]
-    ) {
-      setGameWinner(`${gameState[2]} won the game! 🥳`);
-    } else if (
-      gameState[0] !== 'empty' &&
-      gameState[0] === gameState[4] &&
-      gameState[4] === gameState[8]
-    ) {
-      setGameWinner(`${gameState[0]} won the game! 🥳`);
-    } else if (
-      gameState[2] !== 'empty' &&
-      gameState[2] === gameState[4] &&
-      gameState[4] === gameState[6]
-    ) {
-      setGameWinner(`${gameState[2]} won the game! 🥳`);
-    } else if (!gameState.includes('empty', 0)) {
-      setGameWinner('Draw game... ⌛️');
+  const checkIsWinner = (state: string[]) => {
+
+    const winningConditions = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6],
+    ];
+
+    for (let condition of winningConditions) {
+      const [a, b, c] = condition;
+      if (state[a] !== "empty" && state[a] === state[b] && state[a] === state[c]) {
+        setGameWinner(`${state[a]} won the game! 🥳`);
+        return;
+      }
+    }
+
+    if (!state.includes("empty")) {
+      setGameWinner("Draw game... ⌛️");
     }
   };
 
@@ -79,18 +51,20 @@ export default function Index() {
       return;
     }
 
-    if (gameState[itemNumber] === 'empty') {
-      const newGameState = [...gameState];
-      newGameState[itemNumber] = isCross ? 'cross' : 'circle';
-      setGameState(newGameState);
-      setIsCross(!isCross);
-    } else {
-      setSnackbarMessage('Position is already filled');
+    if (gameState[itemNumber] !== "empty") {
+      setSnackbarMessage("Position is already filled");
       setSnackbarVisible(true);
       return;
     }
+    const newGameState = [...gameState];
+    newGameState[itemNumber] = isCross ? "cross" : "circle";
+    setGameState(newGameState);
 
-    checkIsWinner();
+    checkIsWinner(newGameState);
+
+    if (!gameWinner) {
+      setIsCross(!isCross);
+    }
   };
 
   return (
@@ -112,7 +86,7 @@ export default function Index() {
           </Text>
         </View>
       )}
-      {/* Game Grid */}
+
       <FlatList
         numColumns={3}
         data={gameState}
@@ -132,11 +106,11 @@ export default function Index() {
           {gameWinner ? 'Start new game' : 'Reload the game'}
         </Text>
       </Pressable>
-      {/* Snackbar */}
+
       <Snackbar
         visible={snackbarVisible}
         onDismiss={() => setSnackbarVisible(false)}
-        duration={Snackbar.DURATION_SHORT}
+        duration={2000}
         style={{ backgroundColor: gameWinner ? '#000000' : 'red' }}
       >
         {snackbarMessage}
